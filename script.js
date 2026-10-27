@@ -26,6 +26,67 @@ function drawTs() {
     zombies.forEach(zombie => zombie.draw(ctx))
 }
 
+p1 = {x: canvas.width*.30, y: 0}
+p2 = {x: canvas.width*.30, y: canvas.height*.75}
+p3 = {x: 0, y: canvas.height}
+
+p6 = {x: canvas.width,y: canvas.height}
+p7 = {x: canvas.width, y:0}
+p4 = {x: canvas.width*.70,y: 0}
+p5 = {x: canvas.width*.70, y:canvas.height*.75}
+p8 = {x: canvas.width,y:canvas.height}
+
+p9 = {x: 0, y: canvas.height*.1}
+p10 = {x: canvas.width, y: canvas.height*0.1}
+function finnaSetLeftWallUp() {
+    ctx.beginPath()
+    ctx.lineTo(p9.x, p9.y);
+    ctx.lineTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.lineTo(p3.x,p3.y)
+    ctx.closePath(); 
+    ctx.fillStyle = 'rgba(52, 152, 219, 0.5)';
+    ctx.fill();
+    ctx.strokeStyle = '#2980b9';
+    ctx.lineWidth = 0.1;
+    // ctx.stroke();
+}
+
+function finnaSetRightWallUp() {
+    ctx.beginPath()
+    ctx.moveTo(p6.x, p6.y)
+    ctx.lineTo(p7.x, p7.y);
+    ctx.lineTo(p4.x, p4.y);
+    ctx.lineTo(p5.x, p5.y);
+    ctx.lineTo(p8.x, p8.y)
+    ctx.closePath(); 
+    ctx.fillStyle = 'rgba(52, 152, 219, 0.5)';
+    ctx.fill();
+    ctx.strokeStyle = '#2980b9';
+    ctx.lineWidth = 0.1;
+    // ctx.stroke();
+}
+function finnaSetBackUp() {
+    ctx.beginPath()
+    ctx.moveTo(p1.x, p1.y)
+    ctx.lineTo(p2.x, p2.y);
+    ctx.lineTo(p5.x, p5.y);
+    ctx.lineTo(p4.x, p4.y);
+    ctx.closePath(); 
+    ctx.fillStyle = 'grey';
+    ctx.fill();
+    ctx.strokeStyle = '#2980b9';
+    ctx.lineWidth = 0.1;
+    // ctx.stroke();
+}
+
+
+function setTsUp() {
+    finnaSetLeftWallUp()
+    finnaSetRightWallUp()
+    finnaSetBackUp()
+}
+
 function deleteTs(op) {
     zombies = zombies.filter(zombie => zombie !== op)
     drawTs()
@@ -39,6 +100,8 @@ let zombies = [felix]
 
 zombies.push(felix)
 felix.draw(ctx)
+ctx.fillStyle = 'lightblue'; 
+ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 function main() {
     frame++;
@@ -47,6 +110,7 @@ function main() {
         deleteTs(felix)
     }
     drawTs()
+    setTsUp()
     requestAnimationFrame(main);
 }
 

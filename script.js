@@ -21,14 +21,18 @@ class zombie {
             this.w++
             this.h++
         }
+        ctx.fillStyle = 'red';
         ctx.fillRect(this.x, this.y, this.w, this.h);
     };
 };
 
 function drawTs() {
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.height)
+    setTsUp()
     zombies.forEach(zombie => zombie.draw(ctx))
 }
+
+const clampToRange = (num) => Math.min(Math.max(num, 0.2), 0.8);
 
 p1 = {x: canvas.width*.30, y: canvas.height*.1}
 p2 = {x: canvas.width*.30, y: canvas.height*.75}
@@ -125,26 +129,43 @@ function deleteTs(op) {
 
 let frame = 0
 
-felix = new zombie(1, 0, 0, 10, 10)
 
-let zombies = [felix]
+let zombies = []
 
-zombies.push(felix)
-felix.draw(ctx)
 ctx.fillStyle = 'lightblue'; 
 ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+let chance = 0.01;
 function main() {
     frame++;
     console.log(frame);
-    if (Math.random() < 0.08) {
+    
+    if (Math.random() < chance) {
+        chance+=0.002;
         zombies.push(new zombie(1, 
-            Math.random(),
-             canvas.height*0.85,100,250))
+            canvas.width*clampToRange(Math.random()),
+             canvas.height*0.43,canvas.width*.08,canvas.height*.3))
     }
     drawTs()
-    setTsUp()
+    
     requestAnimationFrame(main);
 }
+canvas.addEventListener('click', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
 
-main()
+    const clickX = (event.clientX - rect.left) * scaleX;
+    const clickY = (event.clientY - rect.top) * scaleY;
+
+    const clickedZombie = [...zombies].reverse().find(z => 
+        clickX >= z.x && clickX <= z.x + z.w &&
+        clickY >= z.y && clickY <= z.y + z.h
+    );
+
+    if (clickedZombie) {
+        zombies = zombies.filter(z => z !== clickedZombie);
+        drawTs();
+    }
+});
+main();

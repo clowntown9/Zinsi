@@ -1,14 +1,39 @@
-#html, body {
+
+#crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      background-color: #15ff00;
+      border-radius: 50%;
+      z-index: 99999;
+      
+      /*centers ts i keep forgetting*/
+      transform: translate(-50%, -50%); 
+      
+      pointer-events: none; 
+      
+      display: none; 
+    }
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    min-width: 300px;
+    min-height: 300px;
+    background-color: #000;
+}
+
+#canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
     background-color: #000; /* Optional: prevents flickering */
-}
-#canvas {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
 }

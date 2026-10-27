@@ -1,7 +1,29 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-
+const container = document.getElementById('game-container');
+const crosshair = document.getElementById('crosshair');
+let pointX = window.innerWidth / 2;
+let pointY = window.innerHeight / 2;
 ctx.fillStyle = "grey";
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth || 800;
+    canvas.height = window.innerHeight || 600;
+}
+resizeCanvas();
+
+function updatePerspectivePoints() {
+    p1.x = canvas.width * .30; p1.y = canvas.height * .1;
+    p2.x = canvas.width * .30; p2.y = canvas.height * .75;
+    p3.x = 0;                  p3.y = canvas.height;
+    p4.x = canvas.width * .70; p4.y = canvas.height * .1;
+    p5.x = canvas.width * .70; p5.y = canvas.height * .75;
+    p6.x = canvas.width;       p6.y = 0;
+    p7.x = canvas.width;       p7.y = 0;
+    p8.x = canvas.width;       p8.y = canvas.height;
+    p9.x = 0;                  p9.y = 0;
+}
+
 
 function rect(x, y, w, h) {
     ctx.fillRect(x, y, w, h);
@@ -17,10 +39,9 @@ class zombie {
     };
 
     draw(ctx) {
-        if(Math.random() < 0.1) {
-            this.w++
-            this.h++
-        }
+        this.w+=0.25
+        this.h+=0.25
+        
         ctx.fillStyle = 'red';
         ctx.fillRect(this.x, this.y, this.w, this.h);
     };
@@ -135,37 +156,90 @@ let zombies = []
 ctx.fillStyle = 'lightblue'; 
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 let chance = 0.01;
+let cursor_captured = false;
+
+function updateCrosshairPosition() {
+    crosshair.style.left = `${pointX}px`;
+    crosshair.style.top = `${pointY}px`;
+}
+
+let zombieId = 0;
 function main() {
     frame++;
     console.log(frame);
-    
+    chance = clicks*.01
     if (Math.random() < chance) {
-        chance+=0.002;
-        zombies.push(new zombie(1, 
-            canvas.width*clampToRange(Math.random()),
-             canvas.height*0.43,canvas.width*.08,canvas.height*.3))
+        zombieId++;
+        zombies.push(new zombie(
+            zombieId, 
+            canvas.width * clampToRange(Math.random()),
+            canvas.height * 0.43,
+            canvas.width * .08,
+            canvas.height * .3
+        ));
     }
     drawTs()
-    
-    requestAnimationFrame(main);
+    if (cursor_captured) {
+        requestAnimationFrame(main);
+    }
 }
-canvas.addEventListener('click', (event) => {
-    const rect = canvas.getBoundingClientRect();
-    
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+let clicks = 1;
+canvas.addEventListener('click', () => {
+    if (!cursor_captured) {
+        canvas.requestPointerLock();
+        return;
+    }
 
-    const clickX = (event.clientX - rect.left) * scaleX;
-    const clickY = (event.clientY - rect.top) * scaleY;
+    const targetX = pointX;
+    const targetY = pointY;
 
-    const clickedZombie = [...zombies].reverse().find(z => 
-        clickX >= z.x && clickX <= z.x + z.w &&
-        clickY >= z.y && clickY <= z.y + z.h
-    );
+    let target = null;
 
-    if (clickedZombie) {
-        zombies = zombies.filter(z => z !== clickedZombie);
+    for (let i = zombies.length - 1; i >= 0; i--) {
+        const z = zombies[i];
+        if (
+            targetX >= z.x && targetX <= z.x + z.w &&
+            targetY >= z.y && targetY <= z.y + z.h
+        ) {
+            target = z;
+            break;
+        }
+    }
+
+    if (target) {
+        clicks += 0.25;
+        zombies = zombies.filter(z => z.id !== target.id);
         drawTs();
     }
 });
-main();
+
+document.addEventListener('pointerlockchange', () => {
+    if (document.pointerLockElement === canvas) {
+        cursor_captured = true;
+        pointX = container.clientWidth / 2;
+        pointY = container.clientHeight / 2;
+        updateCrosshairPosition();
+
+        crosshair.style.display = 'block';
+        document.addEventListener('mousemove', moveLocked, false);
+        main();
+    } else {
+        cursor_captured = false;
+        crosshair.style.display = 'none';
+        document.removeEventListener('mousemove', moveLocked, false);
+    }
+});
+
+function moveLocked(e) {
+    pointX += e.movementX;
+    pointY += e.movementY;
+
+    if (pointX < 0) pointX = 0;
+    if (pointX > container.clientWidth) pointX = container.clientWidth;
+  
+    if (pointY < 0) pointY = 0;
+    if (pointY > container.clientHeight) pointY = container.clientHeight;
+
+    updateCrosshairPosition();
+}
+drawTs();

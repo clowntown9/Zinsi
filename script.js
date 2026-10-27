@@ -17,6 +17,10 @@ class zombie {
     };
 
     draw(ctx) {
+        if(Math.random() < 0.1) {
+            this.w++
+            this.h++
+        }
         ctx.fillRect(this.x, this.y, this.w, this.h);
     };
 };
@@ -26,18 +30,31 @@ function drawTs() {
     zombies.forEach(zombie => zombie.draw(ctx))
 }
 
-p1 = {x: canvas.width*.30, y: 0}
+p1 = {x: canvas.width*.30, y: canvas.height*.1}
 p2 = {x: canvas.width*.30, y: canvas.height*.75}
 p3 = {x: 0, y: canvas.height}
 
-p6 = {x: canvas.width,y: canvas.height}
-p7 = {x: canvas.width, y:0}
-p4 = {x: canvas.width*.70,y: 0}
+p6 = {x: canvas.width,y: canvas.height*.0}
+p7 = {x: canvas.width, y:canvas.height*.0}
+p4 = {x: canvas.width*.70,y: canvas.height*.1}
 p5 = {x: canvas.width*.70, y:canvas.height*.75}
 p8 = {x: canvas.width,y:canvas.height}
 
-p9 = {x: 0, y: canvas.height*.1}
+p9 = {x: 0, y: canvas.height*.0}
 p10 = {x: canvas.width, y: canvas.height*0.1}
+function finnaSetFloorUp() {
+    ctx.beginPath()
+    ctx.moveTo(p2.x, p2.y);
+    ctx.lineTo(p5.x, p5.y);
+    ctx.lineTo(p8.x, p8.y)
+    ctx.lineTo(p3.x, p3.y);
+    ctx.closePath(); 
+    ctx.fillStyle = '#96b830';
+    ctx.fill();
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+}
 function finnaSetLeftWallUp() {
     ctx.beginPath()
     ctx.lineTo(p9.x, p9.y);
@@ -79,12 +96,26 @@ function finnaSetBackUp() {
     ctx.lineWidth = 0.1;
     // ctx.stroke();
 }
-
+function finnaSetCeilingUp() {
+    ctx.beginPath()
+    ctx.moveTo(p9.x, p9.y)
+    ctx.lineTo(p1.x, p1.y);
+    ctx.lineTo(p4.x, p4.y);
+    ctx.lineTo(p7.x, p7.y);
+    ctx.closePath(); 
+    ctx.fillStyle = 'grey';
+    ctx.fill();
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+}
 
 function setTsUp() {
     finnaSetLeftWallUp()
     finnaSetRightWallUp()
     finnaSetBackUp()
+    finnaSetCeilingUp()
+    finnaSetFloorUp()
 }
 
 function deleteTs(op) {
@@ -106,8 +137,10 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 function main() {
     frame++;
     console.log(frame);
-    if (frame > 500) {
-        deleteTs(felix)
+    if (Math.random() < 0.08) {
+        zombies.push(new zombie(1, 
+            Math.random(),
+             canvas.height*0.85,100,250))
     }
     drawTs()
     setTsUp()

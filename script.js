@@ -5,6 +5,7 @@ const crosshair = document.getElementById('crosshair');
 let pointX = window.innerWidth / 2;
 let pointY = window.innerHeight / 2;
 ctx.fillStyle = "grey";
+let setup = false;
 
 function resizeCanvas() {
     canvas.width = window.innerWidth || 800;
@@ -141,6 +142,11 @@ function setTsUp() {
     finnaSetBackUp()
     finnaSetCeilingUp()
     finnaSetFloorUp()
+    if (!setup) {
+        ctx.font = 'bold 30px Arial';
+        ctx.fillStyle = '#ff0000';
+        ctx.fillText('Welcome to Zinsi! \n ', canvas.width/2, canvas.height/2);
+    }
 }
 
 function deleteTs(op) {
@@ -183,6 +189,13 @@ function main() {
         requestAnimationFrame(main);
     }
 }
+
+
+
+
+
+
+
 let clicks = 1;
 canvas.addEventListener('click', () => {
     if (!cursor_captured) {
@@ -193,17 +206,16 @@ canvas.addEventListener('click', () => {
     const targetX = pointX;
     const targetY = pointY;
 
-    let target = null;
+    const matchingZombies = zombies.filter(z => 
+        targetX >= z.x && targetX <= z.x + z.w &&
+        targetY >= z.y && targetY <= z.y + z.h
+    );
 
-    for (let i = zombies.length - 1; i >= 0; i--) {
-        const z = zombies[i];
-        if (
-            targetX >= z.x && targetX <= z.x + z.w &&
-            targetY >= z.y && targetY <= z.y + z.h
-        ) {
-            target = z;
-            break;
-        }
+    let target = null;
+    if (matchingZombies.length > 0) {
+        target = matchingZombies.reduce((lowest, current) => 
+            current.id < lowest.id ? current : lowest
+        );
     }
 
     if (target) {
@@ -212,6 +224,11 @@ canvas.addEventListener('click', () => {
         drawTs();
     }
 });
+
+
+
+
+
 
 document.addEventListener('pointerlockchange', () => {
     if (document.pointerLockElement === canvas) {

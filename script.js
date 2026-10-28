@@ -15,9 +15,14 @@ let chance = 0.01;
 let cursor_captured = false;
 let zombieId = 0;
 let clicks = 1;
+let waitingOnCapture = false;
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const textCanvas = document.getElementById("textCanvas");
+const textCtx = textCanvas.getContext("2d");
+ctx.fillStyle = "transparent";
+textCanvas.style.display = 'block';
 
-
-
+console.log(textCanvas.style.display)
 function resizeCanvas() {
     canvas.width = window.innerWidth || 800;
     canvas.height = window.innerHeight || 600;
@@ -156,14 +161,17 @@ function setTsUp() {
     finnaSetCeilingUp()
     finnaSetFloorUp()
     if (setup && !cursor_captured) {
-        ctx.font = 'bold 30px Arial';
-        ctx.fillStyle = '#ff0000';
-        ctx.fillText('click to resume \n ', canvas.width/2, canvas.height/2);
+        textCanvas.style.display = 'block';
+        textCtx.font = 'bold 30px Arial';
+        textCtx.fillStyle = '#ff0000';
+        textCtx.fillText('click to resume \n ', canvas.width/2, canvas.height/2);
     }
     if (!setup) {
-        ctx.font = 'bold 30px Arial';
-        ctx.fillStyle = '#ff0000';
-        ctx.fillText('Welcome to Zinsi! \n ', canvas.width/2, canvas.height/2);
+        textCanvas.style.display = 'block';
+        console.log(textCanvas.style.display)
+        textCtx.font = 'bold 30px Arial';
+        textCtx.fillStyle = '#ff0000';
+        textCtx.fillText('Welcome to Zinsi! \n ', canvas.width/2, canvas.height/2);
         setup = true;
     }
     
@@ -183,7 +191,7 @@ function updateCrosshairPosition() {
 
 function main() {
     frame++;
-    console.log(frame);
+    // console.log(frame);
     chance = clicks*.01
     if (Math.random() < chance) {
         zombieId++;
@@ -194,6 +202,9 @@ function main() {
             canvas.width * .08,
             canvas.height * .3
         ));
+    }
+    if (isRunning) {
+        textCanvas.style.display = 'none';
     }
     drawTs()
     if (cursor_captured) {
@@ -211,30 +222,47 @@ function main() {
 
 canvas.addEventListener('click', () => {
     
-    if (document.pointerLockElement !== canvas) {
-        canvas.requestPointerLock();
+    if (document.pointerLockElement !== canvas && !waitingOnCapture) {
+        waitingOnCapture = true;
+        textCanvas.style.display = 'none';
+        sleep(3000).then(() => {canvas.requestPointerLock();console.log("slept ig"); waitingOnCapture = false; textCtx.clearRect(0, 0, canvas.width, canvas.height); textCanvas.style.display = 'none';});
+        textCtx.font = 'bold 150px Arial';
+        textCtx.fillStyle = '#ff0000';
+        textCtx.textAlign = "center";
+        textCtx.textBaseline = "middle"
+        textCtx.fillText('3', canvas.width/2, canvas.height/2);
+        sleep(1000).then(() => {
+            textCtx.clearRect(0, 0, canvas.width, canvas.height);
+            textCtx.fillText('2', canvas.width/2, canvas.height/2);
+        })
+        sleep(2000).then(() => {
+            textCtx.clearRect(0, 0, canvas.width, canvas.height);
+            textCtx.fillText('1', canvas.width/2, canvas.height/2);
+        })
+
         return;
-    }
+    }else {
 
-    const targetX = pointX;
-    const targetY = pointY;
+        const targetX = pointX;
+        const targetY = pointY;
 
-    const matchingZombies = zombies.filter(z => 
-        targetX >= z.x && targetX <= z.x + z.w &&
-        targetY >= z.y && targetY <= z.y + z.h
-    );
-
-    let target = null;
-    if (matchingZombies.length > 0) {
-        target = matchingZombies.reduce((lowest, current) => 
-            current.id < lowest.id ? current : lowest
+        const matchingZombies = zombies.filter(z => 
+            targetX >= z.x && targetX <= z.x + z.w &&
+            targetY >= z.y && targetY <= z.y + z.h
         );
-    }
 
-    if (target) {
-        clicks += 0.25;
-        zombies = zombies.filter(z => z.id !== target.id);
-        drawTs();
+        let target = null;
+        if (matchingZombies.length > 0) {
+            target = matchingZombies.reduce((lowest, current) => 
+                current.id < lowest.id ? current : lowest
+            );
+        }
+
+        if (target) {
+            clicks += 0.25;
+            zombies = zombies.filter(z => z.id !== target.id);
+            // drawTs();
+        }
     }
 });
 
@@ -249,6 +277,7 @@ document.addEventListener('pointerlockchange', () => {
         pointX = container.clientWidth / 2;
         pointY = container.clientHeight / 2;
         updateCrosshairPosition();
+        console.log("Awsrdaoi8sfiyaghwfighyuwaafiwugyafwigyFAQGIUY")
 
         crosshair.style.display = 'block';
         document.addEventListener('mousemove', moveLocked, false);
@@ -257,10 +286,11 @@ document.addEventListener('pointerlockchange', () => {
             requestAnimationFrame(main);
         }
     } else {
+        document.removeEventListener('mousemove', moveLocked, false);
         cursor_captured = false;
         crosshair.style.display = 'none';
-        document.removeEventListener('mousemove', moveLocked, false);
-        drawTs();
+        
+        // drawTs();
     }
 });
 

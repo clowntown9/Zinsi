@@ -7,6 +7,16 @@ let pointY = window.innerHeight / 2;
 ctx.fillStyle = "grey";
 let setup = false;
 let isRunning = false;
+let frame = 0
+let zombies = []
+ctx.fillStyle = 'lightblue'; 
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+let chance = 0.01;
+let cursor_captured = false;
+let zombieId = 0;
+let clicks = 1;
+
+
 
 function resizeCanvas() {
     canvas.width = window.innerWidth || 800;
@@ -164,22 +174,13 @@ function deleteTs(op) {
     drawTs()
 }
 
-let frame = 0
 
-
-let zombies = []
-
-ctx.fillStyle = 'lightblue'; 
-ctx.fillRect(0, 0, canvas.width, canvas.height);
-let chance = 0.01;
-let cursor_captured = false;
 
 function updateCrosshairPosition() {
     crosshair.style.left = `${pointX}px`;
     crosshair.style.top = `${pointY}px`;
 }
 
-let zombieId = 0;
 function main() {
     frame++;
     console.log(frame);
@@ -208,7 +209,6 @@ function main() {
 
 
 
-let clicks = 1;
 canvas.addEventListener('click', () => {
     
     if (document.pointerLockElement !== canvas) {

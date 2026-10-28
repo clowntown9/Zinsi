@@ -6,6 +6,7 @@ let pointX = window.innerWidth / 2;
 let pointY = window.innerHeight / 2;
 ctx.fillStyle = "grey";
 let setup = false;
+let isRunning = false;
 
 function resizeCanvas() {
     canvas.width = window.innerWidth || 800;
@@ -55,7 +56,7 @@ function drawTs() {
 }
 
 const clampToRange = (num) => Math.min(Math.max(num, 0.2), 0.8);
-
+{
 p1 = {x: canvas.width*.30, y: canvas.height*.1}
 p2 = {x: canvas.width*.30, y: canvas.height*.75}
 p3 = {x: 0, y: canvas.height}
@@ -68,6 +69,8 @@ p8 = {x: canvas.width,y:canvas.height}
 
 p9 = {x: 0, y: canvas.height*.0}
 p10 = {x: canvas.width, y: canvas.height*0.1}
+} //point defs
+
 function finnaSetFloorUp() {
     ctx.beginPath()
     ctx.moveTo(p2.x, p2.y);
@@ -142,11 +145,18 @@ function setTsUp() {
     finnaSetBackUp()
     finnaSetCeilingUp()
     finnaSetFloorUp()
+    if (setup && !cursor_captured) {
+        ctx.font = 'bold 30px Arial';
+        ctx.fillStyle = '#ff0000';
+        ctx.fillText('click to resume \n ', canvas.width/2, canvas.height/2);
+    }
     if (!setup) {
         ctx.font = 'bold 30px Arial';
         ctx.fillStyle = '#ff0000';
         ctx.fillText('Welcome to Zinsi! \n ', canvas.width/2, canvas.height/2);
+        setup = true;
     }
+    
 }
 
 function deleteTs(op) {
@@ -187,6 +197,8 @@ function main() {
     drawTs()
     if (cursor_captured) {
         requestAnimationFrame(main);
+    } else {
+        isRunning = false;
     }
 }
 
@@ -198,7 +210,8 @@ function main() {
 
 let clicks = 1;
 canvas.addEventListener('click', () => {
-    if (!cursor_captured) {
+    
+    if (document.pointerLockElement !== canvas) {
         canvas.requestPointerLock();
         return;
     }
@@ -239,11 +252,15 @@ document.addEventListener('pointerlockchange', () => {
 
         crosshair.style.display = 'block';
         document.addEventListener('mousemove', moveLocked, false);
-        main();
+        if (!isRunning) {
+            isRunning = true;
+            requestAnimationFrame(main);
+        }
     } else {
         cursor_captured = false;
         crosshair.style.display = 'none';
         document.removeEventListener('mousemove', moveLocked, false);
+        drawTs();
     }
 });
 

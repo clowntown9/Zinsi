@@ -180,7 +180,7 @@ function setTsUp() {
         textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
         textCtx.font = 'bold 50px Arial';
         textCtx.fillStyle = 'black';
-        textCtx.fillText('You Died!', textCanvas.width / 2, textCanvas.height / 2);
+        textCtx.fillText('You Died!', textCanvas.width/2, textCanvas.height/2);
         showScore();
         // canvas.releasePointerCapture();
         return; 
@@ -190,14 +190,16 @@ function setTsUp() {
         textCanvas.style.display = 'block';
         textCtx.font = 'bold 30px Arial';
         textCtx.fillStyle = '#ff0000';
-        textCtx.fillText('click to resume', textCanvas.width / 2, textCanvas.height / 2);
+        textCtx.fillText('click to resume', textCanvas.width/2, textCanvas.height/2);
     }
 
     if (!setup) {
-        textCanvas.style.display = 'block';
-        textCtx.font = 'bold 15px Arial';
-        textCtx.fillStyle = '#ff0000';
-        textCtx.fillText(`Welcome to Zinsi, ${username}!`, textCanvas.width / 2, textCanvas.height / 2);
+        canvas.style.display = 'block';
+        ctx.font = 'bold 15px Arial';
+        ctx.fillStyle = '#ff0000';
+        ctx.fillText(`Welcome to Zinsi, ${username}!`, textCanvas.width/2, textCanvas.height/2);
+        ctx.font = 'bold 10px Arial';
+        ctx.fillStyle("Zinsi is not space invaders.\nClick to start, and click zombies to destroy them\nas they rush towards you.\nDon\'t let them get too close!\nGo for a high score.", canvas.width/2, canvas.height/2)
         setup = true;
     }
 

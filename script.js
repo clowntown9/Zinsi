@@ -22,6 +22,18 @@ const textCtx = textCanvas.getContext("2d");
 ctx.fillStyle = "transparent";
 textCanvas.style.display = 'block';
 canvas.style.display = 'block';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+
+let dead = false;
+
+let score = 0;
+
+ textCtx.fillStyle = '#ff0000';
+textCtx.textAlign = 'center';
+textCtx.textBaseline = 'middle';
+
+let username = prompt("Hello! Please enter username:", "Player");
 
 console.log(textCanvas.style.display)
 function resizeCanvas() {
@@ -59,7 +71,8 @@ class zombie {
     draw(ctx) {
         this.w+=0.25
         this.h+=0.25
-        
+        this.x-=0.25/2
+        this.y-=0.25/2
         ctx.fillStyle = 'red';
         ctx.fillRect(this.x, this.y, this.w, this.h);
     };
@@ -165,17 +178,33 @@ function setTsUp() {
         textCanvas.style.display = 'block';
         textCtx.font = 'bold 30px Arial';
         textCtx.fillStyle = '#ff0000';
-        textCtx.fillText('click to resume \n ', textCanvas.width/2, textCanvas.height/2);
+        textCtx.fillText('click to resume', textCanvas.width/2, textCanvas.height/2);
     }
     if (!setup) {
         textCanvas.style.display = 'block';
         console.log(textCanvas.style.display)
-        textCtx.font = 'bold 30px Arial';
+        textCtx.font = 'bold 15px Arial';
         textCtx.fillStyle = '#ff0000';
-        textCtx.fillText('Welcome to Zinsi! \n ', textCanvas.width/2, textCanvas.height/2);
+        // textCtx.
+        textCtx.fillText('Welcome to Zinsi!', textCanvas.width/2, textCanvas.height/2);
         setup = true;
     }
+    if (dead) {
+        ctx.font = 'bold 50px Arial';
+        ctx.fillStyle = 'black';
+        ctx.fillText('You Died!', canvas.width/2, canvas.height/2)
+    }
+    showScore()
+
     
+}
+
+function checkIfDead() {
+    for (z in zombies) {
+        if (z.w < 200) {
+            dead = true
+        }
+    }
 }
 
 function deleteTs(op) {
@@ -183,7 +212,12 @@ function deleteTs(op) {
     drawTs()
 }
 
-
+function showScore() {
+    score = Math.round(frame/100);
+    ctx.font = 'bold 55px Arial'
+    ctx.fillStyle = 'black';
+    ctx.fillText(`Score: ${score}`, canvas.width*0.1, canvas.height*0.1)
+}
 
 function updateCrosshairPosition() {
     crosshair.style.left = `${pointX}px`;
@@ -193,8 +227,8 @@ function updateCrosshairPosition() {
 function main() {
     frame++;
     // console.log(frame);
-    chance = clicks*.01
-    if (Math.random() < chance) {
+    
+    if ((Math.random() < score/250) && zombies.length < (5 + score/10) && !dead) {
         zombieId++;
         zombies.push(new zombie(
             zombieId, 
@@ -203,6 +237,8 @@ function main() {
             canvas.width * .08,
             canvas.height * .3
         ));
+    } else if (dead) {
+
     }
     if (isRunning) {
         textCanvas.style.display = 'none';
@@ -221,49 +257,51 @@ function main() {
 
 
 
-canvas.addEventListener('click', () => {
-    
+canvas.addEventListener('click', async () => {
     if (document.pointerLockElement !== canvas && !waitingOnCapture) {
         waitingOnCapture = true;
-        textCanvas.style.display = 'none';
-        sleep(3000).then(() => {canvas.requestPointerLock();console.log("slept ig"); waitingOnCapture = false; textCtx.clearRect(0, 0, canvas.width, canvas.height); textCanvas.style.display = 'none';});
+        
+        textCanvas.style.display = 'block';
         textCtx.font = 'bold 150px Arial';
         textCtx.fillStyle = '#ff0000';
-        textCtx.textAlign = "center";
-        textCtx.textBaseline = "middle"
-        textCtx.fillText('3', canvas.width/2, canvas.height/2);
-        sleep(1000).then(() => {
-            textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
-            textCtx.fillText('2', textCanvas.width/2, textCanvas.height/2);
-        })
-        sleep(2000).then(() => {
-            textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
-            textCtx.fillText('1', textCanvas.width/2, textCanvas.height/2);
-        })
+        textCtx.textAlign = 'center';
+        textCtx.textBaseline = 'middle';
 
+        let count = 3;
+        
+        const drawNumber = (num) => {
+            textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+            textCtx.fillText(num.toString(), textCanvas.width / 2, textCanvas.height / 2);
+        };
+
+        drawNumber(count);
+
+        await new Promise((resolve) => {
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    drawNumber(count);
+                } else {
+                    clearInterval(timer);
+                    textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+                    textCanvas.style.display = 'none';
+                    resolve();
+                }
+            }, 1000);
+        });
+
+        canvas.requestPointerLock();
+        waitingOnCapture = false;
         return;
-    }else {
+    }
 
-        const targetX = pointX;
-        const targetY = pointY;
+    const target = zombies
+        .filter(z => pointX >= z.x && pointX <= z.x + z.w && pointY >= z.y && pointY <= z.y + z.h)
+        .reduce((lowest, current) => (!lowest || current.id < lowest.id ? current : lowest), null);
 
-        const matchingZombies = zombies.filter(z => 
-            targetX >= z.x && targetX <= z.x + z.w &&
-            targetY >= z.y && targetY <= z.y + z.h
-        );
-
-        let target = null;
-        if (matchingZombies.length > 0) {
-            target = matchingZombies.reduce((lowest, current) => 
-                current.id < lowest.id ? current : lowest
-            );
-        }
-
-        if (target) {
-            clicks += 0.25;
-            zombies = zombies.filter(z => z.id !== target.id);
-            // drawTs();
-        }
+    if (target) {
+        clicks += 0.25;
+        zombies = zombies.filter(z => z.id !== target.id);
     }
 });
 

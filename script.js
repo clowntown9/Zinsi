@@ -29,9 +29,21 @@ let dead = false;
 
 let score = 0;
 
- textCtx.fillStyle = '#ff0000';
+const zombieImg = new Image();
+zombieImg.src = "assets/zombie.png"
+
+
+textCtx.fillStyle = '#ff0000';
 textCtx.textAlign = 'center';
 textCtx.textBaseline = 'middle';
+
+const lines = [
+    "Zinsi is not space invaders.",
+    "Click to start, and click zombies to",
+    "destroy them as they rush towards you.",
+    "Don't let them get too close.",
+    "Go for a high score."
+];
 
 let username = prompt("Hello! Please enter username:", "Player");
 
@@ -58,7 +70,7 @@ function updatePerspectivePoints() {
 function rect(x, y, w, h) {
     ctx.fillRect(x, y, w, h);
 };
-
+let divider = 0.1;
 class zombie {
     constructor(id, x, y, w, h) {
         this.id = id;
@@ -69,12 +81,44 @@ class zombie {
     };
 
     draw(ctx) {
-        this.w+=0.25
-        this.h+=0.25
-        this.x-=0.25/2
-        this.y-=0.25/2
-        ctx.fillStyle = 'red';
-        ctx.fillRect(this.x, this.y, this.w, this.h);
+        if (score < 17) {
+            this.w+=0.25
+            this.h+=0.25
+            if (this.x < canvas.width/2) {
+                this.x-=(0.25+divider)/2
+            } else {
+                this.x-=(0.25-divider)/2
+            }
+            
+            this.y-=0.25/2
+        } else if (score < 30) {
+            this.w+=0.4
+            this.h+=0.4
+            if (this.x < canvas.width/2) {
+                this.x-=(0.40+divider)/2
+            } else {
+                this.x-=(0.40-divider)/2
+            }
+            
+            this.y-=0.4/2
+        } else {
+            this.w+=0.5
+            this.h+=0.5
+            if (this.x < canvas.width/2) {
+                this.x-=(0.50+divider)/2
+            } else {
+                this.x-=(0.5-divider)/2
+            }
+            
+            this.y-=0.5/2
+        }
+        
+        if (zombieImg.complete && zombieImg.naturalWidth !== 0) {
+            ctx.drawImage(zombieImg, this.x, this.y, this.w, this.h);
+        } else {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(this.x, this.y, this.w, this.h);
+        }
     };
 };
 
@@ -194,12 +238,16 @@ function setTsUp() {
     }
 
     if (!setup) {
-        canvas.style.display = 'block';
-        ctx.font = 'bold 15px Arial';
-        ctx.fillStyle = '#ff0000';
-        ctx.fillText(`Welcome to Zinsi, ${username}!`, textCanvas.width/2, textCanvas.height/2);
-        ctx.font = 'bold 10px Arial';
-        ctx.fillStyle("Zinsi is not space invaders.\nClick to start, and click zombies to destroy them\nas they rush towards you.\nDon\'t let them get too close!\nGo for a high score.", canvas.width/2, canvas.height/2)
+        textCanvas.style.display = 'block';
+        textCtx.font = 'bold 20px Arial';
+        textCtx.fillStyle = '#ff0000';
+        textCtx.fillRect(0,0,textCanvas.width,textCanvas.height);
+        textCtx.fillStyle = 'black';
+        textCtx.fillText(`Welcome to Zinsi, ${username}!`, textCanvas.width / 2, textCanvas.height*0.2);        ctx.font = 'bold 10px Arial';
+        textCtx.font = 'bold 15px Arial';
+        lines.forEach((line, index) => {
+            textCtx.fillText(line, textCanvas.width / 2, (textCanvas.height*0.15) + 30 + (index * 20));
+        });
         setup = true;
     }
 
@@ -236,14 +284,14 @@ function main() {
     frame++;
     // console.log(frame);
     checkIfDead();
-    if ((Math.random() < score/250) && (zombies.length < (5 + score/10)) && !dead) {
+    if ((Math.random() < (0.005 + score / 250)) && (zombies.length < (5 + score / 10)) && !dead) {
         zombieId++;
         zombies.push(new zombie(
             zombieId, 
             canvas.width * clampToRange(Math.random()),
-            canvas.height * 0.43,
-            canvas.width * .08,
-            canvas.height * .3
+            canvas.height * 0.43,246*0.5,387*0.5
+            // canvas.width * .08,
+            // canvas.height * .3
         ));
     } else if (dead) {
 

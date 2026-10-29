@@ -21,6 +21,7 @@ const textCanvas = document.getElementById("textCanvas");
 const textCtx = textCanvas.getContext("2d");
 ctx.fillStyle = "transparent";
 textCanvas.style.display = 'block';
+canvas.style.display = 'block';
 
 console.log(textCanvas.style.display)
 function resizeCanvas() {
@@ -164,14 +165,14 @@ function setTsUp() {
         textCanvas.style.display = 'block';
         textCtx.font = 'bold 30px Arial';
         textCtx.fillStyle = '#ff0000';
-        textCtx.fillText('click to resume \n ', canvas.width/2, canvas.height/2);
+        textCtx.fillText('click to resume \n ', textCanvas.width/2, textCanvas.height/2);
     }
     if (!setup) {
         textCanvas.style.display = 'block';
         console.log(textCanvas.style.display)
         textCtx.font = 'bold 30px Arial';
         textCtx.fillStyle = '#ff0000';
-        textCtx.fillText('Welcome to Zinsi! \n ', canvas.width/2, canvas.height/2);
+        textCtx.fillText('Welcome to Zinsi! \n ', textCanvas.width/2, textCanvas.height/2);
         setup = true;
     }
     
@@ -232,12 +233,12 @@ canvas.addEventListener('click', () => {
         textCtx.textBaseline = "middle"
         textCtx.fillText('3', canvas.width/2, canvas.height/2);
         sleep(1000).then(() => {
-            textCtx.clearRect(0, 0, canvas.width, canvas.height);
-            textCtx.fillText('2', canvas.width/2, canvas.height/2);
+            textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+            textCtx.fillText('2', textCanvas.width/2, textCanvas.height/2);
         })
         sleep(2000).then(() => {
-            textCtx.clearRect(0, 0, canvas.width, canvas.height);
-            textCtx.fillText('1', canvas.width/2, canvas.height/2);
+            textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+            textCtx.fillText('1', textCanvas.width/2, textCanvas.height/2);
         })
 
         return;

@@ -169,40 +169,46 @@ function finnaSetCeilingUp() {
 }
 
 function setTsUp() {
-    finnaSetLeftWallUp()
-    finnaSetRightWallUp()
-    finnaSetBackUp()
-    finnaSetCeilingUp()
-    finnaSetFloorUp()
+    finnaSetLeftWallUp();
+    finnaSetRightWallUp();
+    finnaSetBackUp();
+    finnaSetCeilingUp();
+    finnaSetFloorUp();
+
+    if (dead) {
+        textCanvas.style.display = 'block';
+        textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+        textCtx.font = 'bold 50px Arial';
+        textCtx.fillStyle = 'black';
+        textCtx.fillText('You Died!', textCanvas.width / 2, textCanvas.height / 2);
+        showScore();
+        // canvas.releasePointerCapture();
+        return; 
+    }
+
     if (setup && !cursor_captured) {
         textCanvas.style.display = 'block';
         textCtx.font = 'bold 30px Arial';
         textCtx.fillStyle = '#ff0000';
-        textCtx.fillText('click to resume', textCanvas.width/2, textCanvas.height/2);
+        textCtx.fillText('click to resume', textCanvas.width / 2, textCanvas.height / 2);
     }
+
     if (!setup) {
         textCanvas.style.display = 'block';
-        console.log(textCanvas.style.display)
         textCtx.font = 'bold 15px Arial';
         textCtx.fillStyle = '#ff0000';
-        // textCtx.
-        textCtx.fillText('Welcome to Zinsi!', textCanvas.width/2, textCanvas.height/2);
+        textCtx.fillText(`Welcome to Zinsi, ${username}!`, textCanvas.width / 2, textCanvas.height / 2);
         setup = true;
     }
-    if (dead) {
-        ctx.font = 'bold 50px Arial';
-        ctx.fillStyle = 'black';
-        ctx.fillText('You Died!', canvas.width/2, canvas.height/2)
-    }
-    showScore()
 
-    
+    showScore();
 }
 
 function checkIfDead() {
-    for (z in zombies) {
-        if (z.w < 200) {
-            dead = true
+    for (const z of zombies) {
+        if (z.w > canvas.width*0.26) {
+            dead = true;
+            break;
         }
     }
 }
@@ -227,8 +233,8 @@ function updateCrosshairPosition() {
 function main() {
     frame++;
     // console.log(frame);
-    
-    if ((Math.random() < score/250) && zombies.length < (5 + score/10) && !dead) {
+    checkIfDead();
+    if ((Math.random() < score/250) && (zombies.length < (5 + score/10)) && !dead) {
         zombieId++;
         zombies.push(new zombie(
             zombieId, 
@@ -244,9 +250,11 @@ function main() {
         textCanvas.style.display = 'none';
     }
     drawTs()
-    if (cursor_captured) {
+    if (cursor_captured && !dead) {
         requestAnimationFrame(main);
     } else {
+        zombies = [];
+        drawTs();
         isRunning = false;
     }
 }
@@ -258,7 +266,7 @@ function main() {
 
 
 canvas.addEventListener('click', async () => {
-    if (document.pointerLockElement !== canvas && !waitingOnCapture) {
+    if (document.pointerLockElement !== canvas && !waitingOnCapture && !dead) {
         waitingOnCapture = true;
         
         textCanvas.style.display = 'block';

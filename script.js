@@ -26,6 +26,7 @@ ctx.textAlign = 'center';
 ctx.textBaseline = 'middle';
 
 let dead = false;
+let won = false;
 
 let score = 0;
 
@@ -230,6 +231,17 @@ function setTsUp() {
         return; 
     }
 
+    if (won) {
+        textCanvas.style.display = 'block';
+        textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+        textCtx.font = 'bold 50px Arial';
+        textCtx.fillStyle = 'black';
+        textCtx.fillText('You Won!', textCanvas.width/2, textCanvas.height/2);
+        showScore();
+        // canvas.releasePointerCapture();
+        return; 
+    }
+
     if (setup && !cursor_captured) {
         textCanvas.style.display = 'block';
         textCtx.font = 'bold 30px Arial';
@@ -263,6 +275,12 @@ function checkIfDead() {
     }
 }
 
+function checkIfWon() {
+    if (score >= 50) {
+        won = true;
+    }
+}
+
 function deleteTs(op) {
     zombies = zombies.filter(zombie => zombie !== op)
     drawTs()
@@ -284,6 +302,7 @@ function main() {
     frame++;
     // console.log(frame);
     checkIfDead();
+    checkIfWon();
     if ((Math.random() < (0.005 + score / 250)) && (zombies.length < (5 + score / 10)) && !dead) {
         zombieId++;
         zombies.push(new zombie(

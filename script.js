@@ -33,6 +33,13 @@ let score = 0;
 const zombieImg = new Image();
 zombieImg.src = "assets/zombie.png"
 
+const andyArtist = new Image();
+andyArtist.src = "assets/andy_artist.png"
+const andyGoofy = new Image();
+andyGoofy.src = "assets/andy_goofy.png"
+const andyKirk = new Image();
+andyKirk.src = "assets/andy_kirk.png"
+
 
 textCtx.fillStyle = '#ff0000';
 textCtx.textAlign = 'center';
@@ -43,7 +50,7 @@ const lines = [
     "Click to start, and click zombies to",
     "destroy them as they rush towards you.",
     "Don't let them get too close.",
-    "Go for a high score."
+    "Win at 50 points."
 ];
 
 let username = prompt("Hello! Please enter username:", "Player");
@@ -79,6 +86,13 @@ class zombie {
         this.y = y;
         this.w = w;
         this.h = h;
+
+        if (Math.random() < 1 / 100) {
+            const easterEggs = [andyArtist, andyGoofy, andyKirk];
+            this.img = easterEggs[Math.floor(Math.random() * easterEggs.length)];
+        } else {
+            this.img = zombieImg;
+        }
     };
 
     draw(ctx) {
@@ -114,8 +128,8 @@ class zombie {
             this.y-=0.5/2
         }
         
-        if (zombieImg.complete && zombieImg.naturalWidth !== 0) {
-            ctx.drawImage(zombieImg, this.x, this.y, this.w, this.h);
+        if (this.img.complete && this.img.naturalWidth !== 0) {
+            ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
         } else {
             ctx.fillStyle = 'red';
             ctx.fillRect(this.x, this.y, this.w, this.h);
@@ -219,13 +233,13 @@ function setTsUp() {
     finnaSetBackUp();
     finnaSetCeilingUp();
     finnaSetFloorUp();
-
+    //death and win both use sentinel values, score and z.width
     if (dead) {
         textCanvas.style.display = 'block';
         textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
         textCtx.font = 'bold 50px Arial';
         textCtx.fillStyle = 'black';
-        textCtx.fillText('You Died!', textCanvas.width/2, textCanvas.height/2);
+        textCtx.fillText('You Lost!', textCanvas.width/2, textCanvas.height/2);
         showScore();
         // canvas.releasePointerCapture();
         return; 
@@ -308,18 +322,21 @@ function main() {
         zombies.push(new zombie(
             zombieId, 
             canvas.width * clampToRange(Math.random()),
-            canvas.height * 0.43,246*0.5,387*0.5
+            p2.y-(387*0.5)
+            // canvas.height * 0.43
+            ,246*0.5,387*0.5
             // canvas.width * .08,
             // canvas.height * .3
         ));
-    } else if (dead) {
-
+        console.log("making zombie!");
+    } else {
+        console.log("normal frame!")
     }
     if (isRunning) {
         textCanvas.style.display = 'none';
     }
     drawTs()
-    if (cursor_captured && !dead) {
+    if (cursor_captured && !dead && !won) {
         requestAnimationFrame(main);
     } else {
         zombies = [];
@@ -337,6 +354,7 @@ function main() {
 canvas.addEventListener('click', async () => {
     if (document.pointerLockElement !== canvas && !waitingOnCapture && !dead) {
         waitingOnCapture = true;
+        console.log("you clicked!");
         
         textCanvas.style.display = 'block';
         textCtx.font = 'bold 150px Arial';

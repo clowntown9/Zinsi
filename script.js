@@ -320,31 +320,58 @@ function updateCrosshairPosition() {
 
 
 
+
 function main() {
     frame++;
     checkIfDead();
     checkIfWon();
 
     if ((Math.random() < (0.005 + score / 250)) && (zombies.length < (5 + score / 10)) && !dead) {
-        zombieId++;
-        zombies.push(new zombie(
-            zombieId, 
-            canvas.width * clampToRange(Math.random()),
-            p2.y-(387*0.5)
-            // canvas.height * 0.43
-            ,246*0.5,387*0.5
-            // canvas.width * .08,
-            // canvas.height * .3
-        ));
-        console.log("making zombie!");
+        let spawnX, spawnY;
+        let validSpawn = false;
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        const defaultW = 246 * 0.5;
+        const defaultH = 387 * 0.5;
+
+        while (!validSpawn && attempts < maxAttempts) {
+            spawnX = canvas.width * clampToRange(Math.random());
+            spawnY = (canvas.height * 0.75) - (387*0.5);
+
+            const tooClose = zombies.some(z => {
+                const dx = Math.abs(z.x - spawnX);
+                const dy = Math.abs(z.y - spawnY);
+                return dx < SPAWN_BUFFER && dy < SPAWN_BUFFER;
+            });
+
+            if (!tooClose) {
+                validSpawn = true;
+            }
+            attempts++;
+        }
+
+        if (validSpawn) {
+            zombieId++;
+            zombies.push(new zombie(
+                zombieId, 
+                spawnX,
+                spawnY,
+                defaultW,
+                defaultH
+            ));
+        }
+        console.log("zombie frame");
     } else {
-        console.log("normal frame!")
+        console.log("normal frame");
     }
+
     if (isRunning) {
         textCanvas.style.display = 'none';
     }
-    drawTs()
-    if (cursor_captured && !dead && !won) {
+    drawTs();
+    
+    if (cursor_captured && !dead) {
         requestAnimationFrame(main);
     } else {
         zombies = [];

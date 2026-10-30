@@ -24,6 +24,7 @@ textCanvas.style.display = 'block';
 canvas.style.display = 'block';
 ctx.textAlign = 'center';
 ctx.textBaseline = 'middle';
+const SPAWN_BUFFER = 30; 
 
 let dead = false;
 let won = false;
@@ -123,11 +124,16 @@ class zombie {
     };
 };
 
+
 function drawTs() {
-    ctx.clearRect(0, 0, canvas.clientWidth, canvas.height)
-    setTsUp()
-    zombies.forEach(zombie => zombie.draw(ctx))
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Note: fixed canvas.clientWidth to canvas.width
+    setTsUp();
+
+    zombies.sort((a, b) => a.w - b.w);
+
+    zombies.forEach(zombie => zombie.draw(ctx));
 }
+
 
 const clampToRange = (num) => Math.min(Math.max(num, 0.2), 0.8);
 {
@@ -298,27 +304,55 @@ function updateCrosshairPosition() {
     crosshair.style.top = `${pointY}px`;
 }
 
+
+
 function main() {
     frame++;
-    // console.log(frame);
     checkIfDead();
     checkIfWon();
-    if ((Math.random() < (0.005 + score / 250)) && (zombies.length < (5 + score / 10)) && !dead) {
-        zombieId++;
-        zombies.push(new zombie(
-            zombieId, 
-            canvas.width * clampToRange(Math.random()),
-            canvas.height * 0.43,246*0.5,387*0.5
-            // canvas.width * .08,
-            // canvas.height * .3
-        ));
-    } else if (dead) {
 
+    if ((Math.random() < (0.005 + score / 250)) && (zombies.length < (5 + score / 10)) && !dead) {
+        let spawnX, spawnY;
+        let validSpawn = false;
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        const defaultW = 246 * 0.5;
+        const defaultH = 387 * 0.5;
+
+        while (!validSpawn && attempts < maxAttempts) {
+            spawnX = canvas.width * clampToRange(Math.random());
+            spawnY = canvas.height * 0.43;
+
+            const tooClose = zombies.some(z => {
+                const dx = Math.abs(z.x - spawnX);
+                const dy = Math.abs(z.y - spawnY);
+                return dx < SPAWN_BUFFER && dy < SPAWN_BUFFER;
+            });
+
+            if (!tooClose) {
+                validSpawn = true;
+            }
+            attempts++;
+        }
+
+        if (validSpawn) {
+            zombieId++;
+            zombies.push(new zombie(
+                zombieId, 
+                spawnX,
+                spawnY,
+                defaultW,
+                defaultH
+            ));
+        }
     }
+
     if (isRunning) {
         textCanvas.style.display = 'none';
     }
-    drawTs()
+    drawTs();
+    
     if (cursor_captured && !dead) {
         requestAnimationFrame(main);
     } else {

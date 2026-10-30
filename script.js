@@ -97,45 +97,44 @@ class zombie {
     };
 
     draw(ctx) {
+    if (!won && !dead) {
         if (score < 17) {
-            this.w+=0.25
-            this.h+=0.25
-            if (this.x < canvas.width/2) {
-                this.x-=(0.25+divider)/2
+            this.w += 0.25;
+            this.h += 0.25;
+            if (this.x < canvas.width / 2) {
+                this.x -= (0.25 + divider) / 2;
             } else {
-                this.x-=(0.25-divider)/2
+                this.x -= (0.25 - divider) / 2;
             }
-            
-            this.y-=0.25/2
+            this.y -= 0.25 / 2;
         } else if (score < 30) {
-            this.w+=0.4
-            this.h+=0.4
-            if (this.x < canvas.width/2) {
-                this.x-=(0.40+divider)/2
+            this.w += 0.4;
+            this.h += 0.4;
+            if (this.x < canvas.width / 2) {
+                this.x -= (0.40 + divider) / 2;
             } else {
-                this.x-=(0.40-divider)/2
+                this.x -= (0.40 - divider) / 2;
             }
-            
-            this.y-=0.4/2
+            this.y -= 0.4 / 2;
         } else {
-            this.w+=0.5
-            this.h+=0.5
-            if (this.x < canvas.width/2) {
-                this.x-=(0.50+divider)/2
+            this.w += 0.5;
+            this.h += 0.5;
+            if (this.x < canvas.width / 2) {
+                this.x -= (0.50 + divider) / 2;
             } else {
-                this.x-=(0.5-divider)/2
+                this.x -= (0.5 - divider) / 2;
             }
-            
-            this.y-=0.5/2
+            this.y -= 0.5 / 2;
         }
-        
-        if (this.img.complete && this.img.naturalWidth !== 0) {
-            ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
-        } else {
-            ctx.fillStyle = 'red';
-            ctx.fillRect(this.x, this.y, this.w, this.h);
-        }
-    };
+    }
+
+    if (this.img.complete && this.img.naturalWidth !== 0) {
+        ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
+    } else {
+        ctx.fillStyle = 'red';
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+    }
+}
 };
 
 
@@ -240,25 +239,23 @@ function setTsUp() {
     finnaSetCeilingUp();
     finnaSetFloorUp();
     //death and win both use sentinel values, score and z.width
-    if (dead) {
-        textCanvas.style.display = 'block';
-        textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
-        textCtx.font = 'bold 50px Arial';
-        textCtx.fillStyle = 'black';
-        textCtx.fillText('You Lost!', textCanvas.width/2, textCanvas.height/2);
-        showScore();
-        // canvas.releasePointerCapture();
-        return; 
-    }
-
     if (won) {
         textCanvas.style.display = 'block';
         textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
         textCtx.font = 'bold 50px Arial';
         textCtx.fillStyle = 'black';
-        textCtx.fillText('You Won!', textCanvas.width/2, textCanvas.height/2);
+        textCtx.fillText('You Won!', textCanvas.width / 2, textCanvas.height / 2);
         showScore();
-        // canvas.releasePointerCapture();
+        return; 
+    }
+
+    if (dead) {
+        textCanvas.style.display = 'block';
+        textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+        textCtx.font = 'bold 50px Arial';
+        textCtx.fillStyle = 'black';
+        textCtx.fillText('You Lost!', textCanvas.width / 2, textCanvas.height / 2);
+        showScore();
         return; 
     }
 
@@ -322,11 +319,25 @@ function updateCrosshairPosition() {
 
 
 function main() {
+    if (won || dead) {
+        zombies = [];
+        drawTs();
+        isRunning = false;
+        return;
+    }
+
     frame++;
     checkIfDead();
     checkIfWon();
 
-    if ((Math.random() < (0.005 + score / 250)) && (zombies.length < (5 + score / 10)) && !dead) {
+    if (won || dead) {
+        zombies = [];
+        drawTs();
+        isRunning = false;
+        return;
+    }
+
+    if ((Math.random() < (0.005 + score / 250)) && (zombies.length < (5 + score / 10))) {
         let spawnX, spawnY;
         let validSpawn = false;
         let attempts = 0;
@@ -337,7 +348,7 @@ function main() {
 
         while (!validSpawn && attempts < maxAttempts) {
             spawnX = canvas.width * clampToRange(Math.random());
-            spawnY = (canvas.height * 0.75) - (387*0.5);
+            spawnY = (canvas.height * 0.75) - (387 * 0.5);
 
             const tooClose = zombies.some(z => {
                 const dx = Math.abs(z.x - spawnX);
@@ -369,9 +380,10 @@ function main() {
     if (isRunning) {
         textCanvas.style.display = 'none';
     }
+    
     drawTs();
     
-    if (cursor_captured && !dead) {
+    if (cursor_captured && !dead && !won) {
         requestAnimationFrame(main);
     } else {
         zombies = [];
